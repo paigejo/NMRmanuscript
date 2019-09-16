@@ -1,2 +1,1 @@
-# NMRmanuscript
-Repository for the Kenya NMR manuscript
+# UM5R
