@@ -27,7 +27,7 @@ source("scores.R")
 # tableFormat: if "1", binomial scores are considered the same model as non-binomial scores. 
 #             i "2", binomial scores are put on extra rows of the printed table
 runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1, 
-                             beta0=-1.75, resultType=c("county", "pixel", "EA"), 
+                             beta0=-1.75, effRange=150, resultType=c("county", "pixel", "EA"), 
                              sampling=c("SRS", "oversamp"), recomputeTruth=TRUE, modelsI=1:21, 
                              produceFigures=FALSE, big=FALSE, printIEvery=50, 
                              maxDataSets=NULL, nsim=10, saveResults=TRUE, loadResults=TRUE, 
@@ -52,12 +52,13 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
   testText = ifelse(test, "Test", "")
   bigText = ifelse(big, "Big", "")
   strictPriorText = ifelse(strictPriors, "strictPrior", "")
+  rangeText = ifelse(effRange == 150, "", "Range50")
   if(!test)
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0", bigText, ".RData"))
+                "HHoldVar0urbanOverSamplefrac0", rangeText, bigText, ".RData"))
   else
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0Test", bigText, ".RData"))
+                "HHoldVar0urbanOverSamplefrac0Test", rangeText, bigText, ".RData"))
   eaDat = SRSDat$eaDat
   
   if(sampling == "SRS") {
@@ -79,7 +80,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
   models = allModels[modelsI]
   
   # this string carries all the information about the run
-  runId = paste0("Beta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
+  runId = paste0("Beta-1.75margVar", round(margVar, 4), rangeText, "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
                  "HHoldVar0urbanOverSamplefrac0", strictPriorText, testText, bigText, sampling, 
                  "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets)
   
@@ -110,7 +111,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
     testText = ifelse(test, "Test", "")
     if("Naive" %in% models || "Direct" %in% models) {
       out = load(paste0("resultsDirectNaiveBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                        "HHoldVar0urbanOverSamplefrac0", testText, bigText, ".RData"))
+                        "HHoldVar0urbanOverSamplefrac0", testText, bigText, rangeText, ".RData"))
       if(sampling == "SRS") {
         directEst = directEstSRS
         naive = naiveSRS
@@ -123,10 +124,10 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
     if("Smoothed Direct" %in% models) {
       if(!test)
         load(paste0("resultsMercerBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, ".RData"))
+                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, rangeText, ".RData"))
       else
         load(paste0("resultsMercerBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, "Test.RData"))
+                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, rangeText, "Test.RData"))
       if(sampling == "SRS") {
         mercer = mercerSRS
         mercerPar = mercerSRSPar
@@ -141,7 +142,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = FALSE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       # out = load(paste0("kenyaSpatialDesignResultNewTausq", tauText, "UrbRurFALSEClusterTRUE", strictPriorText, testText, ".RData"))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
@@ -166,7 +167,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -190,7 +191,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -214,7 +215,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = FALSE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -246,7 +247,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -278,7 +279,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = FALSE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -310,7 +311,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = FALSE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       # out = load(paste0("kenyaSpatialDesignResultNewTausq", tauText, "UrbRurFALSEClusterTRUE", strictPriorText, testText, ".RData"))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
@@ -335,7 +336,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -359,7 +360,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -383,7 +384,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = FALSE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -415,7 +416,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "debiasedMaxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -447,7 +448,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       includeCluster = TRUE
       aggregateByPopulation = TRUE
       load(paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
-                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, '.RData'))
+                  includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 100, strictPriorText, testText, rangeText, '.RData'))
       if(sampling == "SRS") {
         designRes$overSampDat = NULL
         designRes$overSampDatPar = NULL
@@ -482,7 +483,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       testText = ifelse(test, "Test", "")
       fileName = paste0("resultsSPDEBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                         round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
-                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, ".RData")
+                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, rangeText, ".RData")
       out = load(fileName)
       if(sampling == "SRS")
         spdeNoUrbClust = spdeSRS
@@ -495,7 +496,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       testText = ifelse(test, "Test", "")
       fileName = paste0("resultsSPDEBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                         round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
-                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, ".RData")
+                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, rangeText, ".RData")
       out = load(fileName)
       if(sampling == "SRS")
         spdeNoUrb = spdeSRS
@@ -508,7 +509,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       testText = ifelse(test, "Test", "")
       fileName = paste0("resultsSPDEBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                         round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
-                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, ".RData")
+                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, rangeText, ".RData")
       out = load(fileName)
       if(sampling == "SRS")
         spdeNoClust = spdeSRS
@@ -521,7 +522,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       testText = ifelse(test, "Test", "")
       fileName = paste0("resultsSPDEBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                         round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
-                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, ".RData")
+                        "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, testText, rangeText, ".RData")
       out = load(fileName)
       if(sampling == "SRS")
         spde = spdeSRS
@@ -1078,7 +1079,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
     }
     
     # save progress
-    runId = paste0("Beta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
+    runId = paste0("Beta-1.75margVar", round(margVar, 4), rangeText, "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, testText, bigText, sampling, 
                    "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets)
     
@@ -1706,6 +1707,16 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
       modelVariations[BYM2I] = word(rownames(parTab)[BYM2I], 2)
       modelVariations[SPDEI] = word(rownames(parTab)[SPDEI], 2)
       
+      # fix BYM2 switch up between total variance and phi when no cluster effect is included:
+      # switch data, but keep the perimeter names at the same rows
+      noCluster = grepl("uc", rownames(parTab)) | grepl("Uc", rownames(parTab))
+      badRows = which(noCluster & grepl("Phi", rownames(parTab)))
+      currentNames = rownames(parTab)
+      switchRows = parTab[badRows+1,]
+      parTab[badRows+1,] = parTab[badRows,]
+      parTab[badRows,] = switchRows
+      rownames(parTab) = currentNames
+      
       # determine the parameter names
       require("tm")
       parNames = trimws(removeWords(rownames(parTab), c(uniqueModelTypes, unique(modelVariations))))
@@ -1736,7 +1747,7 @@ runCompareModels2 = function(test=FALSE, tausq=.1^2, margVar=.15^2, gamma=-1,
     }
   }
   
-  runId = paste0("Beta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
+  runId = paste0("Beta-1.75margVar", round(margVar, 4), rangeText, "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
                  "HHoldVar0urbanOverSamplefrac0", strictPriorText, testText, bigText, sampling, 
                  "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets)
   if(saveResults) {
@@ -2724,9 +2735,19 @@ getTruth = function(resultType = c("county", "region", "EA", "pixel"), eaDat) {
 }
 
 # takes all precomputed scoring rules from compareModels2 listed in compareModelCommandArgs.RData, and outputs results
+# (use this for the parameter tables)
 runCompareModelsAllLocal = function(indices=NULL, strictPriors=FALSE, doFancyTables=TRUE, printScoreTable=TRUE, 
-                                    printParTable=TRUE, printBigResults=TRUE) {
-  load("compareModelCommandArgs.RData")
+                                    printParTable=TRUE, printBigResults=TRUE, spatialRange=150, spatialVar=0.15^2) {
+  spatialRange = match.arg(as.character(spatialRange), choices=c(150, 50))
+  spatialVar = match.arg(as.character(spatialVar), choices=c(0.15^2, 0.3^2))
+  
+  if(spatialRange == 150 && spatialVar == 0.15^2)
+    load("compareModelCommandArgs.RData")
+  else if(spatialRange == 50 && spatialVar == 0.3^2)
+    stop("spatialRange == 50 && spatialVar == 0.3^2 not supported")
+  else
+    load("compareModelCommandArgsNew.RData")
+  
   if(is.null(indices))
     indices = 1:length(compareModelCommandArgs)
   for(i in indices) {
@@ -2754,6 +2775,17 @@ runCompareModelsAllLocal = function(indices=NULL, strictPriors=FALSE, doFancyTab
     big = argList$big
     maxDataSets = argList$maxDataSets 
     nsim = argList$nsim
+    range = argList$effRange
+    if(is.null(range))
+      range = 150
+    
+    # skip nonexistent populations and populations not in our scenario
+    if(range != spatialRange && margVar != 0)
+      next
+    if(range == 50 && margVar == 0)
+      argList$effRange = 150
+    if(margVar != 0 && margVar != spatialVar)
+      next
     
     # print out the population and design for this table
     if(margVar == 0 && gamma == 0 && tausq == 0)
@@ -2765,17 +2797,35 @@ runCompareModelsAllLocal = function(indices=NULL, strictPriors=FALSE, doFancyTab
     else
       popText = "SUC"
     
+    # skip nonexistent populations
+    if(range == 50 && margVar == 0)
+      next
+    
     contextText = paste(popText, sampling)
     print(paste0("Printing table for ", contextText))
     
     # print out the table
+    browser()
     do.call("runCompareModels2", argList)
   }
 }
 
+# (use this for the scoring rules)
 runCompareModelsLocal2 = function(indices = NULL, strictPriors = FALSE, filterRows=c(1:3, 4, 6, 10, 12, 13:16), 
-                                  incorrectlyAggregatedModels=TRUE) {
-  load("compareModelCommandArgs.RData")
+                                  incorrectlyAggregatedModels=TRUE, spatialRange=150, spatialVar=0.15^2) {
+  spatialRange = match.arg(as.character(spatialRange), choices=c(150, 50))
+  spatialVar = match.arg(as.character(spatialVar), choices=c(0.15^2, 0.3^2))
+  
+  if(spatialRange == 150 && spatialVar == 0.15^2)
+    load("compareModelCommandArgs.RData")
+  else if(spatialRange == 50 && spatialVar == 0.3^2)
+    stop("spatialRange == 50 && spatialVar == 0.3^2 not supported")
+  else
+    load("compareModelCommandArgsNew.RData")
+  rangeID = ifelse(spatialRange == 50, "Range50", "")
+  spatialVarID = ifelse(spatialVar == 0.3^2, "margVar0.09", "")
+  scenarioID = ifelse(spatialRange == 150 && spatialVar == 0.15^2, "", paste0(rangeID, "_", spatialVarID))
+  
   if(is.null(indices))
     indices = 1:length(compareModelCommandArgs)
   
@@ -2816,6 +2866,19 @@ runCompareModelsLocal2 = function(indices = NULL, strictPriors = FALSE, filterRo
     big = argList$big
     maxDataSets = argList$maxDataSets 
     nsim = argList$nsim
+    argList$xtable.args=list(digits=c(0, 2, 2, 3, 2, 1, 2), display=rep("f", 7), auto=TRUE)
+    argList$colDigits = c(2, 2, 3, 2, 1, 2)
+    range = argList$effRange
+    if(is.null(range))
+      range = 150
+    
+    # skip nonexistent populations and populations not in our scenario
+    if(range != spatialRange && margVar != 0)
+      next
+    if(range == 50 && margVar == 0)
+      argList$effRange = 150
+    if(margVar != 0 && margVar != spatialVar)
+      next
     
     # generate an informative id string to label the table we are about to print with
     testText = ifelse(test, "Test", "")
@@ -2823,7 +2886,8 @@ runCompareModelsLocal2 = function(indices = NULL, strictPriors = FALSE, filterRo
     strictPriorText = ifelse(strictPriors, "strictPrior", "")
     runId = paste0("Beta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
                    "HHoldVar0urbanOverSamplefrac0", strictPriorText, testText, bigText, sampling, 
-                   "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets)
+                   "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets, 
+                   scenarioID)
     print(runId)
     
     # get the precomputed scoring rule results
@@ -2938,9 +3002,9 @@ runCompareModelsLocal2 = function(indices = NULL, strictPriors = FALSE, filterRo
     
     # round each column of the table to the correct number of digits
     temp = data.frame(fullTab)
+    # for constant risk population, add another dps to var for smoothed direct and bym2
+    temp2 = as.matrix(do.call("cbind", lapply(1:ncol(temp), function(x) {round(temp[,x], digits=colDigits[x])})))
     if(popI == 1) {
-      # for constant risk population, add another dps to var for smoothed direct and bym2
-      temp2 = as.matrix(do.call("cbind", lapply(1:ncol(temp), function(x) {round(temp[,x], digits=colDigits[x])})))
       temp2[modelTypes %in% c("Smoothed Direct", "BYM2"),2] = round(temp[modelTypes %in% c("Smoothed Direct", "BYM2"),2], digits=colDigits[2]+1)
     }
     
@@ -3001,18 +3065,23 @@ runCompareModelsLocal2 = function(indices = NULL, strictPriors = FALSE, filterRo
   }
   
   # print all of the tables to the console
+  browser()
   makeTable(fullTableSRS1, sampling="Unstratified", popI=1, colDigits=c(1, 1, 2, 1, 0, 2)) # MSE is very small in this case so go out an extra digit
-  makeTable(fullTableSRS2, sampling="Unstratified", popI=2)
-  makeTable(fullTableSRS3, sampling="Unstratified", popI=3)
-  makeTable(fullTableSRS4, sampling="Unstratified", popI=4)
+  makeTable(fullTableSRS2, sampling="Unstratified", popI=2, colDigits=c(1, 1, 2, 1, 0, 2))
+  makeTable(fullTableSRS3, sampling="Unstratified", popI=3, colDigits=c(1, 1, 2, 1, 0, 2))
+  makeTable(fullTableSRS4, sampling="Unstratified", popI=4, colDigits=c(1, 1, 2, 1, 0, 2))
   makeTable(fullTable1, sampling="Stratified", popI=1, colDigits=c(1, 1, 2, 1, 0, 2))
-  makeTable(fullTable2, sampling="Stratified", popI=2)
-  makeTable(fullTable3, sampling="Stratified", popI=3)
-  makeTable(fullTable4, sampling="Stratified", popI=4)
+  makeTable(fullTable2, sampling="Stratified", popI=2, colDigits=c(1, 1, 2, 1, 0, 2))
+  makeTable(fullTable3, sampling="Stratified", popI=3, colDigits=c(1, 1, 2, 1, 0, 2))
+  makeTable(fullTable4, sampling="Stratified", popI=4, colDigits=c(1, 1, 2, 1, 0, 2))
 }
 
 # plot the scoring rules for each analysis and population model for a fixed type of survey design (the survey design being SRS or stratified)
-plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=FALSE, saveResults=FALSE) {
+plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=FALSE, saveResults=FALSE, 
+                                     spatialRange=150, spatialVar=0.15^2) {
+  spatialRange = match.arg(as.character(spatialRange), choices=c(150, 50))
+  spatialVar = match.arg(as.character(spatialVar), choices=c(0.15^2, 0.3^2))
+  
   # map the population type to a type of point plotted:
   ## constant risk: 1
   ## constant plus spatial: 2
@@ -3023,7 +3092,16 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
   cols = c("red1", "purple", "blue1", "green4")
   # cols = qualitative_hcl(4, h1=247, h2=54, c1=80, l1=61) # these colors are colorblind friendly
   
-  load("compareModelCommandArgs.RData")
+  if(spatialRange == 150 && spatialVar == 0.15^2)
+    load("compareModelCommandArgs.RData")
+  else if(spatialRange == 50 && spatialVar == 0.3^2)
+    stop("spatialRange == 50 && spatialVar == 0.3^2 not supported")
+  else
+    load("compareModelCommandArgsNew.RData")
+  rangeID = ifelse(spatialRange == 50, "Range50", "")
+  spatialVarID = ifelse(spatialVar == 0.3^2, "margVar0.09", "")
+  scenarioID = ifelse(spatialRange == 150 && spatialVar == 0.15^2, "", paste0(rangeID, "_", spatialVarID))
+  
   indices = 1:length(compareModelCommandArgs)
   
   plotHelper = function(scoreI, goalVal=NULL, rangeIncludes=c(), scoreName="", filterRows=c(1:3, 4, 6, 10, 12, 13, 15, 16, 18), 
@@ -3066,6 +3144,17 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
         big = argList$big
         maxDataSets = argList$maxDataSets 
         nsim = argList$nsim
+        range = argList$effRange
+        if(is.null(range))
+          range = 150
+        
+        # skip nonexistent populations and populations not in our scenario
+        if(range != spatialRange && margVar != 0)
+          next
+        if(range == 50 && margVar == 0)
+          argList$effRange = 150
+        if(margVar != 0 && margVar != spatialVar)
+          next
         
         # generate an informative id string to label the table we are about to print with
         testText = ifelse(test, "Test", "")
@@ -3073,7 +3162,8 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
         strictPriorText = ifelse(strictPriors, "strictPrior", "")
         runId = paste0("Beta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
                        "HHoldVar0urbanOverSamplefrac0", strictPriorText, testText, bigText, sampling, 
-                       "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets)
+                       "models", do.call("paste0", as.list(modelsI)), "nsim", nsim, "MaxDataSetI", maxDataSets, 
+                       scenarioID)
         print(runId)
         
         # get the precomputed scoring rule results
@@ -3139,12 +3229,12 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     
     # save results if necessary
     if(usePrecomputedResults) {
-      load(paste0("compareModelPlotVar", scoreI, ".RData"))
+      load(paste0("compareModelPlotVar", scoreI, scenarioID, ".RData"))
     }
     if(saveResults) {
       save(fullTable1, fullTable2, fullTable3, fullTable4, 
            fullTableSRS1, fullTableSRS2, fullTableSRS3, fullTableSRS4, scoringRuleName, 
-           file=paste0("compareModelPlotVar", scoreI, ".RData"))
+           file=paste0("compareModelPlotVar", scoreI, scenarioID, ".RData"))
     }
     
     # filter out only the desired models
@@ -3182,6 +3272,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
       scoreRange = range(c(fullTable1, fullTable2, fullTable3, fullTable4, rangeIncludes))
     else
       scoreRange = range(c(fullTable1, fullTable2, fullTable3, fullTable4, fullTableSRS1, fullTableSRS2, fullTableSRS3, fullTableSRS4, rangeIncludes))
+    print(paste0(scoreName, " range: (", scoreRange[1], ", ", scoreRange[2], ")"))
     
     thisLog = ""
     if(logScale)
@@ -3202,7 +3293,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     
     # browser()
     
-    pdf(paste0("figures/", plotNameRoot, strictText, "Stratified.pdf"), width=6, height=5)
+    pdf(paste0("figures/", plotNameRoot, strictText, "Stratified", scenarioID, ".pdf"), width=6, height=5)
     # par(mar=c(4.1, 8.1, 5.1, 5.3), xpd=TRUE)
     par(mar=c(6.1, 4.1, 3.1, 6.3), xpd=TRUE)
     stripchart(fullTable1 ~ tempModelNames, cex=0, las=2, ylim=scoreRange, main="", 
@@ -3259,7 +3350,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     dev.off()
     
     # plot the SRS values
-    pdf(paste0("figures/", plotNameRoot, strictText, "Unstratified.pdf"), width=6, height=5)
+    pdf(paste0("figures/", plotNameRoot, strictText, "Unstratified", scenarioID, ".pdf"), width=6, height=5)
     # par(mar=c(4.1, 8.1, 5.1, 5.3), xpd=TRUE)
     par(mar=c(6.1, 4.1, 3.1, 6.3), xpd=TRUE)
     
@@ -3299,7 +3390,9 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
       segments(y0=goalVal, x0=par("usr")[1], y1=goalVal, x1=par("usr")[2], lty=2, col="black")
     }
     
-    stripchart(fullTable1 ~ tempModelNames, col=cols[1], pch=pch[1], add=TRUE, 
+    # stripchart(fullTable1 ~ tempModelNames, col=cols[1], pch=pch[1], add=TRUE, 
+    #            at=jitter(centers, amount = .15), vertical=TRUE, lwd=2)
+    stripchart(fullTableSRS1 ~ tempModelNames, col=cols[1], pch=pch[1], add=TRUE, 
                at=jitter(centers, amount = .15), vertical=TRUE, lwd=2)
     stripchart(fullTableSRS2 ~ tempModelNames, col=cols[2], pch=pch[2], add=TRUE, 
                at=jitter(centers, amount = .15), vertical=TRUE, lwd=2)
@@ -3308,7 +3401,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     stripchart(fullTableSRS4 ~ tempModelNames, col=cols[4], pch=pch[4], add=TRUE, 
                at=jitter(centers, amount = .15), vertical=TRUE, lwd=2)
     
-    if(plotSRSLegend) {
+    if(plotSRSLegend && scoreName!="Bias") {
       pos = legend("right", c(expression("Pop"[suc]), expression("Pop"[Suc]), expression("Pop"[SUc]), expression("Pop"[SUC])), pch=pch, col=cols, horiz=FALSE, inset=c(-0.315,0), 
                    title="Population\nmodel", bty="n", lwd=2, lty=NA)
       xleft <- pos$rect[["left"]]
@@ -3358,7 +3451,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     
     # browser()
     
-    pdf(paste0("figures/", plotNameRoot, strictText, "StratifiedSimple.pdf"), width=6, height=5)
+    pdf(paste0("figures/", plotNameRoot, strictText, "StratifiedSimple", scenarioID, ".pdf"), width=6, height=5)
     # par(mar=c(4.1, 8.1, 5.1, 5.3), xpd=TRUE)
     par(mar=c(6.1, 4.1, 3.1, 6.3), xpd=TRUE)
     stripchart(fullTable1[simpleI] ~ tempModelNames, cex=0, las=2, ylim=scoreRange, main="", 
@@ -3405,7 +3498,7 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
     dev.off()
     
     # plot the SRS values
-    pdf(paste0("figures/", plotNameRoot, strictText, "UnstratifiedSimple.pdf"), width=6, height=5)
+    pdf(paste0("figures/", plotNameRoot, strictText, "UnstratifiedSimple", scenarioID, ".pdf"), width=6, height=5)
     # par(mar=c(4.1, 8.1, 5.1, 5.3), xpd=TRUE)
     par(mar=c(6.1, 4.1, 3.1, 6.3), xpd=TRUE)
     
@@ -3458,13 +3551,14 @@ plotCompareModelsAllLocal = function(strictPriors=FALSE, usePrecomputedResults=F
   }
   
   # generate plots for each scoring rule (1-6: bias, variance, mse, crps, coverage, width)
-  plotHelper(3, goalVal=0, scoreName="MSE", plotDHSLegend=FALSE, shareRange=TRUE, logScale=TRUE)
-  plotHelper(1, goalVal=0, rangeIncludes=0, scoreName="Bias", plotDHSLegend=TRUE, shareRange=TRUE)
-  plotHelper(2, goalVal=0, rangeIncludes=0, scoreName="Var", plotDHSLegend=FALSE, shareRange=TRUE)
-  plotHelper(4, goalVal=0, rangeIncludes=0, scoreName="CRPS", shareRange=TRUE, plotDHSLegend=FALSE)
-  plotHelper(5, goalVal=80, rangeIncludes=100, scoreName="Cvg", shareRange=TRUE, plotDHSLegend=TRUE)
-  plotHelper(6, goalVal=0, rangeIncludes=0, scoreName="Width", shareRange=TRUE, plotDHSLegend=FALSE)
+  plotHelper(3, goalVal=0, rangeIncludes=c(0.0488351441837245, 1.96136848911688), scoreName="MSE", plotDHSLegend=FALSE, shareRange=TRUE, logScale=TRUE)
+  plotHelper(1, goalVal=0, rangeIncludes=c(0, -61.4285011791729, 36.9516649422178), scoreName="Bias", plotDHSLegend=TRUE, shareRange=TRUE)
+  plotHelper(2, goalVal=0, rangeIncludes=c(0, 17.2193571578031), scoreName="Var", plotDHSLegend=FALSE, shareRange=TRUE)
+  plotHelper(4, goalVal=0, rangeIncludes=c(0, 7.64137139664491), scoreName="CRPS", shareRange=TRUE, plotDHSLegend=FALSE)
+  plotHelper(5, goalVal=80, rangeIncludes=c(55.1914893617021, 100), scoreName="Cvg", shareRange=TRUE, plotDHSLegend=TRUE)
+  plotHelper(6, goalVal=0, rangeIncludes=c(0, 2.73626752901516), scoreName="Width", shareRange=TRUE, plotDHSLegend=FALSE)
 }
+
 
 
 

@@ -81,13 +81,17 @@ generateSimDataSets = function(nsim=100, nsimBig = 250, seeds=c(580252, 1234), m
   wd = getwd()
   setwd("~/Google Drive/UW/Wakefield/WakefieldShared/U5MR/")
   
+  rangeText = ""
+  if(effRange != 150)
+    rangeText = paste0("Range", effRange)
+  
   # make strings representing the simulation with and without cluster effects
   dataID = paste0("Beta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                   round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar", HHoldVar, 
-                  "urbanOverSamplefrac", round(urbanOverSamplefrac, 4))
+                  "urbanOverSamplefrac", round(urbanOverSamplefrac, 4), rangeText)
   dataID0 = paste0("Beta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                    round(0, 4), "gamma", round(gamma, 4), "HHoldVar", HHoldVar, 
-                   "urbanOverSamplefrac", round(urbanOverSamplefrac, 4))
+                   "urbanOverSamplefrac", round(urbanOverSamplefrac, 4), rangeText)
   
   # there should be 1 true data set, but many simulated cluster samples
   load("empiricalDistributions.RData")
@@ -238,6 +242,15 @@ generateAllDataSets = function() {
   generateSimDataSets(gamma=0, margVar=0)
 }
 
+generateAllNewDataSets = function() {
+  generateSimDataSets(gamma=-1, margVar=.15^2, effRange=50)
+  generateSimDataSets(gamma=0, margVar=.15^2, effRange=50)
+  generateSimDataSets(gamma=0, margVar=0, effRange=50)
+  
+  generateSimDataSets(gamma=-1, margVar=.3^2, effRange=150)
+  generateSimDataSets(gamma=0, margVar=.3^2, effRange=150)
+}
+
 # simulate and save datasets used for the simulation study with the given model parameters
 # NOTE: paired with the dataset using the passed parameters will be another dataset from the 
 #       same model without a nugget/cluster effect
@@ -259,13 +272,17 @@ plotSimDataSets = function(nsim=100, nsimBig = 250, seeds=c(580252, 1234), beta0
   wd = getwd()
   setwd("~/Google Drive/UW/Wakefield/WakefieldShared/U5MR/")
   
+  rangeText = ""
+  if(effRange != 150)
+    rangeText = paste0("Range", effRange)
+  
   # make strings representing the simulation with and without cluster effects
   dataID = paste0("Beta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                   round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar", HHoldVar, 
-                  "urbanOverSamplefrac", round(urbanOverSamplefrac, 4))
+                  "urbanOverSamplefrac", round(urbanOverSamplefrac, 4), rangeText)
   dataID0 = paste0("Beta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                    round(0, 4), "gamma", round(gamma, 4), "HHoldVar", HHoldVar, 
-                   "urbanOverSamplefrac", round(urbanOverSamplefrac, 4))
+                   "urbanOverSamplefrac", round(urbanOverSamplefrac, 4), rangeText)
   
   # there should be 1 true data set, but many simulated cluster samples
   load("empiricalDistributions.RData")
@@ -342,6 +359,24 @@ plotSimDataSets = function(nsim=100, nsimBig = 250, seeds=c(580252, 1234), beta0
   setwd(wd)
   
   invisible(NULL)
+}
+
+# function for calculating the average number of urban and rural clusters per simulated dataset
+getAverageUrbanRuralClusters = function() {
+  out = system("ls ~/Google\\ Drive/UW/Wakefield/WakefieldShared/U5MR/simDataMultiBeta*0Big.RData", intern=TRUE)
+  numUrban = c()
+  numRural = c()
+  for(i in 1:length(out)) {
+    print(paste0("Loading ", out[i], "... (", i, "/", length(out), ")"))
+    load(out[i])
+    numUrban = c(numUrban, sapply(SRSDat$clustDat, function(x){sum(x$urban)}))
+    numRural = c(numRural, sapply(SRSDat$clustDat, function(x){sum(!x$urban)}))
+  }
+  
+  print(paste0("Average number of urban clusters: ", mean(numUrban)))
+  print(paste0("Average number of rural clusters: ", mean(numRural)))
+  
+  invisible(list(numUrban=numUrban, numRural=numRural))
 }
 
 

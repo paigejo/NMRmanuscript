@@ -12,7 +12,7 @@ resultsSPDE = function(nPostSamples=1000, test=FALSE, nTest=2, verbose=TRUE,
                        saveResults=!test && is.null(maxDataSets), margVar=.15^2, gamma=-1, 
                        beta0=-1.75, loadProgress=FALSE, continuousOnly=TRUE, strictPrior=FALSE, 
                        maxDataSets=NULL, integrateOutCluster=TRUE, seed=123, 
-                       strictSpatialPrior=FALSE) {
+                       strictSpatialPrior=FALSE, effRange=150) {
   
   # Load data
   # load("simDataMulti.RData") # overSampDat, SRSDat
@@ -21,12 +21,13 @@ resultsSPDE = function(nPostSamples=1000, test=FALSE, nTest=2, verbose=TRUE,
   # load("simDataMultiBeta-1.75margVar0.0225tausq0gamma-1HHoldVar0urbanOver2.RData")
   # load("simDataMultiBeta-1.75margVar0.0225tausq0.01gamma-1HHoldVar0urbanOver2.RData")
   # load and relevant data
+  rangeText = ifelse(effRange == 150, "", "Range50")
   if(!test)
     load(paste0("simDataMultiBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
-                round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0.RData"))
+                round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", rangeText, ".RData"))
   else
     load(paste0("simDataMultiBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
-                round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0Test.RData"))
+                round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0Test", rangeText, ".RData"))
   
   # modify the pixel indices if necessary
   if(kmres != 5) {
@@ -74,11 +75,11 @@ resultsSPDE = function(nPostSamples=1000, test=FALSE, nTest=2, verbose=TRUE,
   fileName = paste0("resultsSPDEBeta", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                     round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
                     "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, 
-                    testText, integrateClusterText, ".RData")
+                    testText, integrateClusterText, rangeText, ".RData")
   fileNameTemp = paste0("resultsSPDEBetaTemp", round(beta0, 4), "margVar", round(margVar, 4), "tausq", 
                     round(tausq, 4), "gamma", round(gamma, 4), "HHoldVar0urbanOverSamplefrac0", 
                     "urbanEffect", urbanEffect, "clustEffect", includeClustEffect, strictPriorText, 
-                    testText, integrateClusterText, ".RData")
+                    testText, integrateClusterText, rangeText, ".RData")
   
   if(!loadProgress) {
     print("Generating SRS results")
@@ -97,7 +98,7 @@ resultsSPDE = function(nPostSamples=1000, test=FALSE, nTest=2, verbose=TRUE,
   else {
     # load our previous progress if necessary
     print("Loading SRS results")
-    load(fileName)
+    load(fileNameTemp)
   }
   
   print("Generating urban oversampled results")

@@ -7,13 +7,14 @@ library(INLA)
 
 # load a different 1 of these depending on whether a cluster effect should be included 
 # in the simulation of the data or not (tausq is the cluster effect variance)
-getMercer = function(tausq=.1^2, test=FALSE, margVar=0.15^2, gamma=-1, strictPrior=FALSE) {
+getMercer = function(tausq=.1^2, test=FALSE, margVar=0.15^2, gamma=-1, strictPrior=FALSE, effRange=150) {
+  rangeText = ifelse(effRange == 150, "", "Range50")
   if(!test)
     load(paste0("resultsDirectNaiveBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-           "HHoldVar0urbanOverSamplefrac0.RData"))
+           "HHoldVar0urbanOverSamplefrac0", rangeText, ".RData"))
   else
     load(paste0("resultsDirectNaiveBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-           "HHoldVar0urbanOverSamplefrac0Test.RData"))
+           "HHoldVar0urbanOverSamplefrac0Test", rangeText, ".RData"))
   
   # number of simulation scenarios
   n = 100
@@ -138,10 +139,10 @@ getMercer = function(tausq=.1^2, test=FALSE, margVar=0.15^2, gamma=-1, strictPri
   strictPriorText = ifelse(strictPrior, "strictPrior", "")
   if(!test)
     save(merceroverSamp, mercerSRS, mercerSRSPar, merceroverSampPar, file=paste0("resultsMercerBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                                                "HHoldVar0urbanOverSamplefrac0", strictPriorText, ".RData"))
+                                                "HHoldVar0urbanOverSamplefrac0", strictPriorText, rangeText, ".RData"))
   else
     save(merceroverSamp, mercerSRS, mercerSRSPar, merceroverSampPar, file=paste0("resultsMercerBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                                                "HHoldVar0urbanOverSamplefrac0", strictPriorText, "Test.RData"))
+                                                "HHoldVar0urbanOverSamplefrac0", strictPriorText, "Test", rangeText, ".RData"))
   
   invisible(NULL)
 }

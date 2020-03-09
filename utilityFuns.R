@@ -908,3 +908,104 @@ formatSomeScientific = function(numberTable, maxZeros=4, digits=3, ...) {
   numberTable[doScientific,] = format(temp[doScientific,], scientific=TRUE, digits=digits+1, ...)
   numberTable
 }
+
+getRadius = function(areaLevel=c("Region", "County")) {
+  require(geosphere)
+  require(shapefiles)
+  areaLevel = match.arg(areaLevel)
+  
+  # load shape files
+  require(maptools)
+  if(areaLevel == "Region"){
+    thisMap = readShapePoly("../U5MR/mapData/kenya_region_shapefile/kenya_region_shapefile.shp", delete_null_obj=TRUE, force_ring=TRUE, repair=TRUE)
+  } else if(areaLevel == "County"){
+    out = load("../U5MR/adminMapData.RData")
+    thisMap = adm1
+  } else {
+    stop(paste0("Unrecognized area level: ", areaLevel))
+  }
+  
+  # thisMap@polygons[[1]]@Polygons[[1]]@coords
+  # thisMap@polygons[[1]]@Polygons[[1]]@area
+  getOneRadius = function(poly) {
+    areas = sapply(poly@Polygons, function(x) {x@area})
+    correctPolyI = which.max(areas)
+    poly = poly@Polygons[[correctPolyI]]
+    # thisCentroid = centroid(poly@coords)
+    # allPoints = rbind(thisCentroid, 
+    #                   poly@coords)
+    allPoints = poly@coords
+    allProjected = projKenya(allPoints[,1], allPoints[,2], inverse=FALSE)
+    
+    # downsample spatial polygons as necessary
+    if(nrow(allProjected) >= 6000) {
+      # simplify the polygon
+      newProjected = allProjected
+      tolerance = .05
+      while(nrow(newProjected) >= 6000) {
+        newProjected = do.call("cbind", dp(list(x=allProjected[,1], y=allProjected[,2]), tolerance=tolerance))
+        tolerance = tolerance * 2
+      }
+      allProjected = newProjected
+    }
+    max(rdist(allProjected)) / 2
+  }
+  # calculate radii in km
+  radii = sapply(thisMap@polygons, getOneRadius)
+  
+  # sort results by area name
+  if(areaLevel == "Region") {
+    areaNames = as.character(thisMap@data$name)
+  } else if(areaLevel == "County") {
+    areaNames = as.character(thisMap@data$NAME_1)
+  }
+  sortI = sort(areaNames, index.return=TRUE)$ix
+  radii = radii[sortI]
+  names(radii) = areaNames[sortI]
+  radii
+}
+
+getMeanRadius = function(areaLevel=c("Region", "County")) {
+  require(geosphere)
+  require(shapefiles)
+  areaLevel = match.arg(areaLevel)
+  
+  # load shape files
+  require(maptools)
+  if(areaLevel == "Region"){
+    thisMap = readShapePoly("../U5MR/mapData/kenya_region_shapefile/kenya_region_shapefile.shp", delete_null_obj=TRUE, force_ring=TRUE, repair=TRUE)
+  } else if(areaLevel == "County"){
+    out = load("../U5MR/adminMapData.RData")
+    thisMap = adm1
+  } else {
+    stop(paste0("Unrecognized area level: ", areaLevel))
+  }
+  
+  # thisMap@polygons[[1]]@Polygons[[1]]@coords
+  # thisMap@polygons[[1]]@Polygons[[1]]@area
+  getOneRadius = function(poly) {
+    areas = sapply(poly@Polygons, function(x) {x@area})
+    correctPolyI = which.max(areas)
+    poly = poly@Polygons[[correctPolyI]]
+    thisCentroid = centroid(poly@coords)
+    allPoints = rbind(thisCentroid,
+                      poly@coords)
+    # allPoints = poly@coords
+    allProjected = projKenya(allPoints[,1], allPoints[,2], inverse=FALSE)
+    
+    mean(rdist.vec(matrix(allProjected[1,], nrow=nrow(allProjected)-1, ncol=2, byrow=TRUE), allProjected[-1,]))
+  }
+  # calculate radii in km
+  radii = sapply(thisMap@polygons, getOneRadius)
+  
+  # sort results by area name
+  if(areaLevel == "Region") {
+    areaNames = as.character(thisMap@data$name)
+  } else if(areaLevel == "County") {
+    areaNames = as.character(thisMap@data$NAME_1)
+  }
+  sortI = sort(areaNames, index.return=TRUE)$ix
+  radii = radii[sortI]
+  names(radii) = areaNames[sortI]
+  radii
+}

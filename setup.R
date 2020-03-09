@@ -21,6 +21,7 @@ source('~/git/U5MR/getMercer.R')
 source('~/git/U5MR/designBased.R')
 source('~/git/U5MR/compareModels.R')
 source('~/git/U5MR/validation.R')
+source('~/git/U5MR/plotGenerator.R')
 source('~/git/U5MR/scores.R')
 source('~/git/U5MR/spdeMod.R')
 source('~/git/U5MR/spdeResults.R')
@@ -34,6 +35,9 @@ if(inf$platform != "x86_64-apple-darwin15.6.0 (64-bit)") {
   # avoid setting too many threads and thereby using too much memory
   inla.setOption(num.threads=1)
   options(error=traceback)
+} else if(inf$platform == "x86_64-pc-linux-gnu (64-bit)") {
+  inla.setOption(num.threads=1) # consider raising
+  options(error=recover)
 } else {
   options(error=recover)
 }

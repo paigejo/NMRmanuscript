@@ -6,14 +6,15 @@ source("neonatalSimStudyWeighted.R")
 # load("simDataMultiBeta-1.75margVar0.0225tausq0gamma-1HHoldVar0urbanOver2.RData")
 # load("simDataMultiBeta-1.75margVar0.0225tausq0.01gamma-1HHoldVar0urbanOver2.RData")
 
-getDirectNaive = function(tausq=0.1^2, test=FALSE, loadResults=FALSE, big=FALSE, margVar=0.15^2, gamma=-1) {
+getDirectNaive = function(tausq=0.1^2, test=FALSE, loadResults=FALSE, big=FALSE, margVar=0.15^2, gamma=-1, effRange=150) {
   bigText = ifelse(big, "Big", "")
+  rangeText = ifelse(effRange == 150, "", "Range50")
   if(!test)
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0", bigText, ".RData"))
+                "HHoldVar0urbanOverSamplefrac0", rangeText, bigText, ".RData"))
   else
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0Test", bigText, ".RData"))
+                "HHoldVar0urbanOverSamplefrac0", rangeText, "Test", bigText, ".RData"))
   # load("simDataMultiBeta-1.75margVar0.0225tausq0.01gamma-1HHoldVar0urbanOverSamplefrac0.25.RData")
   # load("simDataMultiBeta-1.75margVar0.0225tausq0gamma-1HHoldVar0urbanOverSamplefrac0.25Test.RData")
   # load("simDataMultiBeta-1.75margVar0.0225tausq0.01gamma-1HHoldVar0urbanOverSamplefrac0.25Test.RData")
@@ -96,11 +97,11 @@ getDirectNaive = function(tausq=0.1^2, test=FALSE, loadResults=FALSE, big=FALSE,
     if(!test)
       save(data4directSRS, data4directoverSamp, 
            file=paste0("data4direct", "simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                       "HHoldVar0urbanOverSamplefrac0", bigText, ".RData"))
+                       "HHoldVar0urbanOverSamplefrac0", bigText, rangeText, ".RData"))
     else
       save(data4directSRS, data4directoverSamp, 
            file=paste0("data4direct", "simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                       "HHoldVar0urbanOverSamplefrac0", bigText, "Test.RData"))
+                       "HHoldVar0urbanOverSamplefrac0", bigText, "Test", rangeText, ".RData"))
     # save(data4directSRS, data4directoverSamp, file="data4directTausq0.01.RData")
     # save(data4directSRS, data4directoverSamp, file="data4directTest.RData")
     # save(data4directSRS, data4directoverSamp, file="data4directTausq0.01Test.RData")
@@ -108,10 +109,10 @@ getDirectNaive = function(tausq=0.1^2, test=FALSE, loadResults=FALSE, big=FALSE,
     tc = ifelse(tausq == 0, "", paste0("Tausq", round(tausq, 4)))
     if(!test)
       load(paste0("data4direct", "simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                  "HHoldVar0urbanOverSamplefrac0", bigText, ".RData"))
+                  "HHoldVar0urbanOverSamplefrac0", bigText, rangeText, ".RData"))
     else
       load(paste0("data4direct", "simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                  "HHoldVar0urbanOverSamplefrac0", bigText, "Test.RData"))
+                  "HHoldVar0urbanOverSamplefrac0", bigText, "Test", rangeText, ".RData"))
   }
   
   # start analysis using naive approach and computing direct estimates
@@ -146,11 +147,11 @@ getDirectNaive = function(tausq=0.1^2, test=FALSE, loadResults=FALSE, big=FALSE,
   if(!test)
     save(directEstSRS, directEstoverSamp, naiveSRS, naiveoverSamp,
          file=paste0("resultsDirectNaiveBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                     "HHoldVar0urbanOverSamplefrac0", bigText, ".RData"))
+                     "HHoldVar0urbanOverSamplefrac0", bigText, rangeText, ".RData"))
   else
     save(directEstSRS, directEstoverSamp, naiveSRS, naiveoverSamp,
          file=paste0("resultsDirectNaiveBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                     "HHoldVar0urbanOverSamplefrac0Test", bigText, ".RData"))
+                     "HHoldVar0urbanOverSamplefrac0Test", bigText, rangeText, ".RData"))
   # save(directEstSRS, directEstoverSamp, naiveSRS, naiveoverSamp,file="resultsDirectNaiveTausq0.01.RData")
   # save(directEstSRS, directEstoverSamp, naiveSRS, naiveoverSamp,file="resultsDirectNaiveTausq0Test.RData")
   # save(directEstSRS, directEstoverSamp, naiveSRS, naiveoverSamp,file="resultsDirectNaiveTausq0.01Test.RData")

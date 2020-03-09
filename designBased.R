@@ -7,17 +7,18 @@
 # same as runBYM, except fits the BYM2 reparameterized model (iid component in the BYM2 is that the county level)
 runBYM2 = function(tausq=0.1^2, test=FALSE, includeUrbanRural=TRUE, includeCluster=TRUE, maxDataSets=NULL, 
                    aggregateByPopulation=FALSE, margVar=0.15^2, gamma=-1, plotPriorPost=FALSE, strictPrior=FALSE, 
-                   seed=NULL) {
+                   seed=NULL, effRange=150) {
   if(!is.null(seed))
     set.seed(seed)
   
   # load and relevant data
+  rangeText = ifelse(effRange == 150, "", "Range50")
   if(!test)
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0.RData"))
+                "HHoldVar0urbanOverSamplefrac0", rangeText, ".RData"))
   else
     load(paste0("simDataMultiBeta-1.75margVar", round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 
-                "HHoldVar0urbanOverSamplefrac0Test.RData"))
+                "HHoldVar0urbanOverSamplefrac0Test", rangeText, ".RData"))
   
   # Get true ratios of urban/rural
   urbRatio = vector('numeric', length = 47)
@@ -868,7 +869,7 @@ runBYM2 = function(tausq=0.1^2, test=FALSE, includeUrbanRural=TRUE, includeClust
   strictPriorText = ifelse(strictPrior, "strictPrior", "")
   save(file = paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
                      includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, "maxDataSets", 
-                     maxDataSets, strictPriorText, testText, '.RData'), 
+                     maxDataSets, strictPriorText, testText, rangeText, '.RData'), 
        designRes = designRes)
   
   # include the debiased results if cluster effect is included
@@ -892,7 +893,7 @@ runBYM2 = function(tausq=0.1^2, test=FALSE, includeUrbanRural=TRUE, includeClust
     
     save(file = paste0('bym2Beta-1.75margVar', round(margVar, 4), "tausq", round(tausq, 4), "gamma", round(gamma, 4), 'UrbRur',
                        includeUrbanRural, 'Cluster', includeCluster, "aggByPop", aggregateByPopulation, 'debiasedMaxDataSets', 
-                       maxDataSets, strictPriorText, testText, '.RData'), 
+                       maxDataSets, strictPriorText, testText, rangeText, '.RData'), 
          designRes = designRes)
   }
   
